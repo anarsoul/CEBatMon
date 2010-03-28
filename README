@@ -1,0 +1,3 @@
+CEBatMon is simple WinCE battery monitor with logging capability.
+Just start it - and it shows up its window and creates log file in
+directory where binary lies. Log file is updated each 30 seconds.
