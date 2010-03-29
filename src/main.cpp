@@ -38,7 +38,7 @@ static void printText(HDC hdc, int x, int y, RECT *rect, const char *str)
 	DrawText(hdc, buf, len, &dstRect, DT_LEFT);
 }
 
-static int voltage, current, temperature, acStatus;
+static int voltage, current, temperature, acStatus, percent;
 
 static void doLogLine()
 {
@@ -53,7 +53,9 @@ static void doLogLine()
 		current = stat2.BatteryCurrent;
 		temperature = stat2.BatteryTemperature;
 		acStatus = stat2.ACLineStatus;
-		doLog("; uptime: %.7d, %s\n", uptime,
+		percent = stat2.BatteryLifePercent;
+		doLog("; %d: %d%%, %s\n", uptime,
+			percent,
 			acStatus ? "AC Online" : "AC Offline");
 		doLog("; U    |  I    |  T\n");
 		doLog("%7.d,%7.d,%7.d\n",
@@ -73,6 +75,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				PAINTSTRUCT ps;
 				HDC hdc;
 				RECT rect;
+				int y = 10;
 
 				GetClientRect(hWnd, &rect);
 
@@ -83,18 +86,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				SelectObject(hdc, (HBRUSH)GetStockObject(WHITE_BRUSH));
 				SelectObject(hdc, (HPEN)GetStockObject(WHITE_PEN));
 
-				printText(hdc, 10, 10, &rect, "CE Battery Monitor");
+				printText(hdc, 10, y, &rect, "CE Battery Monitor");
+				y += LINE_HEIGHT;
 
 				snprintf(outBuf, sizeof(outBuf), "Uptime: %d secs", uptime);
-				printText(hdc, 10, 30, &rect, outBuf);
+				printText(hdc, 10, y, &rect, outBuf);
+				y += LINE_HEIGHT;
+				snprintf(outBuf, sizeof(outBuf), "AC Status: %s", acStatus ? "Online" : "Offline");
+				printText(hdc, 10, y, &rect, outBuf);
+				y += LINE_HEIGHT;
+				snprintf(outBuf, sizeof(outBuf), "Battery level: %d%%", percent);
+				printText(hdc, 10, y, &rect, outBuf);
+				y += LINE_HEIGHT;
 				snprintf(outBuf, sizeof(outBuf), "Voltage: %d mV", voltage);
-				printText(hdc, 10, 50, &rect, outBuf);
+				printText(hdc, 10, y, &rect, outBuf);
+				y += LINE_HEIGHT;
 				snprintf(outBuf, sizeof(outBuf), "Current: %d mA", current);
-				printText(hdc, 10, 70, &rect, outBuf);
+				printText(hdc, 10, y, &rect, outBuf);
+				y += LINE_HEIGHT;
 				snprintf(outBuf, sizeof(outBuf), "Temperature: %d * 0.1C", temperature);
-				printText(hdc, 10, 90, &rect, outBuf);
-				snprintf(outBuf, sizeof(outBuf), "AC Status: %d", acStatus);
-				printText(hdc, 10, 110, &rect, outBuf);
+				printText(hdc, 10, y, &rect, outBuf);
+				y += LINE_HEIGHT;
 
 				EndPaint(hWnd, &ps);
 			}
