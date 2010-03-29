@@ -55,21 +55,42 @@ void openLogFile(HINSTANCE hInstance, const char *fn)
 						0);
 }
 
+static char logCache[32768];
+static unsigned logCacheSize;
+
 void closeLogFile()
 {
 	if (logFile) {
+		/* Flushing cache */
+		DWORD nw;
+		WriteFile(logFile, logCache, logCacheSize, &nw, 0);
+		logCacheSize = 0;
 		CloseHandle(logFile);
 	}
 	logFile = NULL;
 }
 
 void writeLog(const char *msg, uint32_t len)
-{                                       
+{
+	unsigned cached;
 	if (!logFile) {
 		return;
 	}
-	DWORD nw;
-	WriteFile(logFile, msg, len, &nw, 0);
+
+	while (len) {
+		cached = MIN(len, sizeof(logCache) - logCacheSize);
+		memcpy(logCache + logCacheSize, msg, cached);
+		logCacheSize += cached;
+		msg += cached;
+		len -= cached;
+
+		if (logCacheSize == sizeof(logCache)) {
+			/* Flushing cache... */
+			DWORD nw;
+			WriteFile(logFile, logCache, logCacheSize, &nw, 0);
+			logCacheSize = 0;
+		}
+	}
 }
 
 void doLog(const char *fmt, ...)

@@ -23,6 +23,14 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
 #endif
 
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
 void openLogFile(HINSTANCE hInst, const char *fn);
 void closeLogFile();
 void writeLog(const char *msg, uint32_t len);
