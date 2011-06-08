@@ -19,6 +19,7 @@
 #include <windows.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include "log.h"
 
 static HANDLE logFile;
